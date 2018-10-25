@@ -6,6 +6,7 @@ Dockerized [certbot][certbot].
 The container will run certbot against all the domains provided with the environment variable `domains`.
 
 If `-e distinct=true` is passed, certbot will be run separately for every listed domain.
+If `-e expand=true` is passed, certbot will expand existing domain certificate.
 
 ```
 docker volume create --name nginx-certs
