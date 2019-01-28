@@ -12,26 +12,29 @@ if [ -z ${renew+x} ]; then
     exit 1;
   fi
 
-  expand_domains=""
-
   if [ "${expand}" == "true" ]; then
-    expand_domains="--expand"
-  fi
 
-  if [ -z ${distinct+x} ]; then
+     if [ -z ${distinct+x} ]; then
+       certbot certonly --verbose --noninteractive --quiet --standalone --agree-tos --email="${email}" --expand -d "${domains}" "$@";
+     else
+        IFS=',' read -ra ADDR <<< "$domains"
+        for domain in "${ADDR[@]}"; do
+          certbot certonly --verbose --noninteractive --quiet --standalone --agree-tos --email="${email}" --expand -d "${domain}" "$@";
+        done
+     fi
 
-    certbot certonly --verbose --noninteractive --quiet --standalone --agree-tos --email="${email}" "${expand_domains}" -d "${domains}" "$@";
-
-   else
-
-    IFS=',' read -ra ADDR <<< "$domains"
-    for domain in "${ADDR[@]}"; do
-        certbot certonly --verbose --noninteractive --quiet --standalone --agree-tos --email="${email}" "${expand_domains}" -d "${domain}" "$@";
-    done
-
-  fi;
   else
 
-  certbot renew "$@"
+    if [ -z ${distinct+x} ]; then
+      certbot certonly --verbose --noninteractive --quiet --standalone --agree-tos --email="${email}" -d "${domains}" "$@";
+    else
+      IFS=',' read -ra ADDR <<< "$domains"
+      for domain in "${ADDR[@]}"; do
+        certbot certonly --verbose --noninteractive --quiet --standalone --agree-tos --email="${email}" -d "${domain}" "$@";
+      done
+    fi
+  fi
 
+else
+  certbot renew "$@"
 fi
